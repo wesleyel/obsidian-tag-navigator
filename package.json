@@ -1,8 +1,12 @@
 {
 	"name": "obsidian-tag-navigator",
 	"version": "1.0.0",
-	"description": "Intelligent navigation for Obsidian notes based on tags and frontmatter properties.",
+	"description": "Intelligent navigation for notes based on tags and frontmatter properties.",
 	"main": "main.js",
+	"repository": {
+		"type": "git",
+		"url": "https://github.com/wesleyel/tag-navigator.git"
+	},
 	"scripts": {
 		"dev": "node esbuild.config.mjs",
 		"build": "tsc -noEmit -skipLibCheck && node esbuild.config.mjs production",

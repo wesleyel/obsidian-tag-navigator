@@ -1,11 +1,12 @@
 {
-	"id": "obsidian-tag-navigator",
+	"id": "tag-navigator",
 	"name": "Tag Navigator",
 	"version": "1.0.0",
 	"minAppVersion": "0.15.0",
-	"description": "Intelligent navigation for Obsidian notes based on tags and frontmatter properties.",
+	"description": "Intelligent navigation for notes based on tags and frontmatter properties.",
 	"author": "wesley",
 	"authorUrl": "",
 	"fundingUrl": "",
-	"isDesktopOnly": false
+	"isDesktopOnly": false,
+	"repo": "https://github.com/wesleyel/obsidian-tag-navigator"
 }
