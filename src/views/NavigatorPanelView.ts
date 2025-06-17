@@ -43,10 +43,6 @@ export class NavigatorPanelView extends ItemView {
 		const { contentEl } = this;
 		contentEl.empty();
 		contentEl.addClass('tag-navigator-panel');
-
-		const headerEl = contentEl.createEl('div', { cls: 'nav-panel-header' });
-		headerEl.createEl('h3', { text: 'Tag Navigator' });
-
 		const currentFile = this.plugin.getCurrentNote();
 		
 		if (!currentFile) {
@@ -80,8 +76,10 @@ export class NavigatorPanelView extends ItemView {
 
 		// Display tags and navigation
 		const tagsContainer = contentEl.createEl('div', { cls: 'tags-container' });
-		
-		for (const tag of currentNote.tags) {
+
+		// 去重标签
+		const uniqueTags = Array.from(new Set(currentNote.tags));
+		for (const tag of uniqueTags) {
 			const tagEl = tagsContainer.createEl('div', { cls: 'tag-section' });
 			
 			const tagHeader = tagEl.createEl('div', { cls: 'tag-header' });
