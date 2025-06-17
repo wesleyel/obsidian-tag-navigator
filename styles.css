@@ -57,6 +57,16 @@ If your plugin does not need CSS, delete this file.
     font-style: italic;
 }
 
+.tag-navigator-position {
+    font-size: 10px;
+    color: var(--text-accent);
+    font-weight: 600;
+    margin-left: 8px;
+    background-color: var(--background-modifier-border);
+    padding: 2px 6px;
+    border-radius: 3px;
+}
+
 /* Manual Navigation Modal Styles */
 .modal .notes-list {
     margin-top: 20px;
@@ -203,6 +213,26 @@ If your plugin does not need CSS, delete this file.
     color: var(--text-muted);
     font-style: italic;
     margin-top: 20px;
+}
+
+/* Debug info */
+.tag-navigator-debug {
+    font-size: 10px !important;
+    color: var(--text-muted) !important;
+    background-color: var(--background-modifier-border);
+    padding: 4px 8px;
+    border-radius: 3px;
+    margin: 8px 0 !important;
+}
+
+.tag-navigator-current-file {
+    font-size: 12px !important;
+    color: var(--text-accent) !important;
+    background-color: var(--background-secondary);
+    padding: 6px 10px;
+    border-radius: 4px;
+    margin: 10px 0 !important;
+    border-left: 3px solid var(--interactive-accent);
 }
 
 /* Responsive design for smaller screens */

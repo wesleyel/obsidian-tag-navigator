@@ -174,8 +174,27 @@ export default class TagNavigatorPlugin extends Plugin {
 	}
 
 	getCurrentNote(): TFile | null {
+		// First try to get the active markdown view
 		const activeView = this.app.workspace.getActiveViewOfType(MarkdownView);
-		return activeView?.file || null;
+		if (activeView?.file) {
+			return activeView.file;
+		}
+
+		// If no active markdown view, try to get the most recently active leaf with a file
+		const activeLeaf = this.app.workspace.getMostRecentLeaf();
+		if (activeLeaf?.view instanceof MarkdownView && activeLeaf.view.file) {
+			return activeLeaf.view.file;
+		}
+
+		// Last resort: get any open markdown file
+		const markdownLeaves = this.app.workspace.getLeavesOfType('markdown');
+		for (const leaf of markdownLeaves) {
+			if (leaf.view instanceof MarkdownView && leaf.view.file) {
+				return leaf.view.file;
+			}
+		}
+
+		return null;
 	}
 
 	async navigateToNext() {
@@ -271,9 +290,25 @@ class NavigatorPanelView extends ItemView {
 
 		this.renderTagList(container);
 
-		// Refresh when files change
+		// Refresh when files change or active file changes
 		this.registerEvent(
 			this.app.vault.on('modify', () => {
+				this.refresh();
+			})
+		);
+		
+		this.registerEvent(
+			this.app.workspace.on('active-leaf-change', () => {
+				// Delay refresh to allow metadata cache to update
+				setTimeout(() => {
+					this.refresh();
+				}, 100);
+			})
+		);
+
+		// Also refresh when metadata cache is updated
+		this.registerEvent(
+			this.app.metadataCache.on('changed', () => {
 				this.refresh();
 			})
 		);
@@ -287,14 +322,42 @@ class NavigatorPanelView extends ItemView {
 	}
 
 	renderTagList(container: Element) {
-		const tags = this.plugin.getAllTags();
+		const currentFile = this.plugin.getCurrentNote();
 		
-		if (tags.length === 0) {
-			container.createEl("p", { text: "No tags found" });
+		if (!currentFile) {
+			container.createEl("p", { text: "No active note" });
+			// Add debug info
+			const debugEl = container.createEl("p", { 
+				text: "Debug: Please ensure you have a markdown file open and focused.", 
+				cls: "tag-navigator-debug" 
+			});
 			return;
 		}
 
-		for (const tag of tags) {
+		// Show current file name for debugging
+		const fileInfoEl = container.createEl("p", { 
+			text: `Current: ${currentFile.basename}`, 
+			cls: "tag-navigator-current-file" 
+		});
+
+		const currentNoteData = this.plugin.getAllNotesWithTags().find(note => note.file.path === currentFile.path);
+		
+		if (!currentNoteData || currentNoteData.tags.length === 0) {
+			container.createEl("p", { text: "Current note has no tags" });
+			// Try to get all notes and see if this file has any metadata
+			const allFiles = this.plugin.app.vault.getMarkdownFiles();
+			const targetFile = allFiles.find(f => f.path === currentFile.path);
+			if (targetFile) {
+				const cache = this.plugin.app.metadataCache.getFileCache(targetFile);
+				const debugText = cache ? `Cache found. Tags in cache: ${getAllTags(cache)?.join(', ') || 'none'}` : 'No cache found';
+				container.createEl("p", { text: `Debug: ${debugText}`, cls: "tag-navigator-debug" });
+			}
+			return;
+		}
+
+		const currentNoteTags = currentNoteData.tags;
+
+		for (const tag of currentNoteTags) {
 			const tagContainer = container.createEl("div", { cls: "tag-navigator-tag" });
 			tagContainer.createEl("h5", { text: `#${tag}` });
 
@@ -310,9 +373,19 @@ class NavigatorPanelView extends ItemView {
 				await this.navigateInTag(tag, 'next');
 			};
 
-			// Show notes count
+			// Show notes count for this tag
 			const notesCount = this.plugin.getNotesForTag(tag).length;
 			tagContainer.createEl("span", { text: `(${notesCount} notes)`, cls: "tag-navigator-count" });
+			
+			// Show current position in this tag
+			const notesForTag = this.plugin.sortNotes(this.plugin.getNotesForTag(tag), tag);
+			const currentIndex = notesForTag.findIndex(note => note.file.path === currentFile.path);
+			if (currentIndex !== -1) {
+				tagContainer.createEl("span", { 
+					text: `[${currentIndex + 1}/${notesCount}]`, 
+					cls: "tag-navigator-position" 
+				});
+			}
 		}
 	}
 
