@@ -6,3 +6,220 @@ available in the app when your plugin is enabled.
 If your plugin does not need CSS, delete this file.
 
 */
+
+/* Tag Navigator Plugin Styles */
+
+/* Navigator Panel Styles */
+.tag-navigator-tag {
+    margin-bottom: 16px;
+    padding: 12px;
+    border: 1px solid var(--background-modifier-border);
+    border-radius: 6px;
+    background-color: var(--background-secondary);
+}
+
+.tag-navigator-tag h5 {
+    margin: 0 0 8px 0;
+    color: var(--text-accent);
+    font-weight: 600;
+}
+
+.tag-navigator-buttons {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 4px;
+}
+
+.tag-navigator-buttons button {
+    padding: 4px 12px;
+    border: 1px solid var(--background-modifier-border);
+    border-radius: 4px;
+    background-color: var(--interactive-normal);
+    color: var(--text-normal);
+    cursor: pointer;
+    font-size: 12px;
+    transition: all 0.2s;
+}
+
+.tag-navigator-buttons button:hover {
+    background-color: var(--interactive-hover);
+    border-color: var(--text-accent);
+}
+
+.tag-navigator-buttons button:active {
+    background-color: var(--interactive-accent);
+    color: var(--text-on-accent);
+}
+
+.tag-navigator-count {
+    font-size: 11px;
+    color: var(--text-muted);
+    font-style: italic;
+}
+
+/* Manual Navigation Modal Styles */
+.modal .notes-list {
+    margin-top: 20px;
+}
+
+.modal .notes-list h3 {
+    margin-bottom: 16px;
+    color: var(--text-accent);
+    border-bottom: 1px solid var(--background-modifier-border);
+    padding-bottom: 8px;
+}
+
+.modal .sort-options {
+    margin-bottom: 16px;
+}
+
+.modal .sort-options select {
+    padding: 6px 12px;
+    border: 1px solid var(--background-modifier-border);
+    border-radius: 4px;
+    background-color: var(--background-primary);
+    color: var(--text-normal);
+    width: 200px;
+}
+
+.sortable-notes-list {
+    max-height: 400px;
+    overflow-y: auto;
+    border: 1px solid var(--background-modifier-border);
+    border-radius: 6px;
+    padding: 8px;
+    background-color: var(--background-primary);
+}
+
+.note-item {
+    padding: 8px 12px;
+    margin-bottom: 4px;
+    border: 1px solid transparent;
+    border-radius: 4px;
+    background-color: var(--background-secondary);
+    cursor: pointer;
+    transition: all 0.2s;
+    user-select: none;
+}
+
+.note-item:hover {
+    background-color: var(--interactive-hover);
+    border-color: var(--background-modifier-border);
+}
+
+.note-item:active {
+    background-color: var(--interactive-accent);
+    color: var(--text-on-accent);
+}
+
+.note-item.dragging {
+    opacity: 0.5;
+    transform: rotate(2deg);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+.note-item span {
+    display: block;
+    font-weight: 500;
+}
+
+/* Save button for custom order */
+.notes-list button {
+    margin-top: 16px;
+    padding: 8px 16px;
+    border: 1px solid var(--interactive-accent);
+    border-radius: 4px;
+    background-color: var(--interactive-accent);
+    color: var(--text-on-accent);
+    cursor: pointer;
+    font-weight: 500;
+    transition: all 0.2s;
+}
+
+.notes-list button:hover {
+    background-color: var(--interactive-accent-hover);
+    transform: translateY(-1px);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+/* Tag selection dropdown */
+.modal select {
+    width: 100%;
+    padding: 8px 12px;
+    margin-bottom: 20px;
+    border: 1px solid var(--background-modifier-border);
+    border-radius: 4px;
+    background-color: var(--background-primary);
+    color: var(--text-normal);
+    font-size: 14px;
+}
+
+.modal select:focus {
+    outline: none;
+    border-color: var(--interactive-accent);
+    box-shadow: 0 0 0 2px var(--interactive-accent-hover);
+}
+
+/* Modal header */
+.modal h2 {
+    margin-bottom: 20px;
+    color: var(--text-accent);
+    text-align: center;
+    border-bottom: 2px solid var(--background-modifier-border);
+    padding-bottom: 10px;
+}
+
+/* Scrollbar styling for notes list */
+.sortable-notes-list::-webkit-scrollbar {
+    width: 8px;
+}
+
+.sortable-notes-list::-webkit-scrollbar-track {
+    background: var(--background-primary);
+    border-radius: 4px;
+}
+
+.sortable-notes-list::-webkit-scrollbar-thumb {
+    background: var(--background-modifier-border);
+    border-radius: 4px;
+}
+
+.sortable-notes-list::-webkit-scrollbar-thumb:hover {
+    background: var(--text-muted);
+}
+
+/* Navigator panel header */
+.workspace-leaf-content[data-type="navigator-panel"] h4 {
+    margin-bottom: 16px;
+    padding-bottom: 8px;
+    border-bottom: 2px solid var(--background-modifier-border);
+    color: var(--text-accent);
+    text-align: center;
+}
+
+/* Empty state */
+.workspace-leaf-content[data-type="navigator-panel"] p {
+    text-align: center;
+    color: var(--text-muted);
+    font-style: italic;
+    margin-top: 20px;
+}
+
+/* Responsive design for smaller screens */
+@media (max-width: 768px) {
+    .tag-navigator-buttons {
+        flex-direction: column;
+    }
+    
+    .tag-navigator-buttons button {
+        margin-bottom: 4px;
+    }
+    
+    .sortable-notes-list {
+        max-height: 250px;
+    }
+    
+    .modal .sort-options select {
+        width: 100%;
+    }
+}

@@ -1,94 +1,101 @@
-# Obsidian Sample Plugin
+# Obsidian Tag Navigator
 
-This is a sample plugin for Obsidian (https://obsidian.md).
+基于标签的智能导航插件，为 Obsidian 笔记提供便捷的上一页/下一页导航功能。
 
-This project uses TypeScript to provide type checking and documentation.
-The repo depends on the latest plugin API (obsidian.d.ts) in TypeScript Definition format, which contains TSDoc comments describing what it does.
+## 功能特性
 
-This sample plugin demonstrates some of the basic functionality the plugin API can do.
-- Adds a ribbon icon, which shows a Notice when clicked.
-- Adds a command "Open Sample Modal" which opens a Modal.
-- Adds a plugin setting tab to the settings page.
-- Registers a global click event and output 'click' to the console.
-- Registers a global interval which logs 'setInterval' to the console.
+### 🎯 核心功能
 
-## First time developing plugins?
+- **基于标签的导航**: 根据笔记的标签创建逻辑导航序列
+- **智能排序**: 支持多种排序方式（标题、修改时间、创建时间、自定义顺序）
+- **手动导航面板**: 可视化管理和排序标签下的笔记
+- **侧边导航面板**: 快速在不同标签间进行导航
+- **自定义排序**: 支持拖拽排序并保存自定义顺序
 
-Quick starting guide for new plugin devs:
+### 🚀 主要功能
 
-- Check if [someone already developed a plugin for what you want](https://obsidian.md/plugins)! There might be an existing plugin similar enough that you can partner up with.
-- Make a copy of this repo as a template with the "Use this template" button (login to GitHub if you don't see it).
-- Clone your repo to a local development folder. For convenience, you can place this folder in your `.obsidian/plugins/your-plugin-name` folder.
-- Install NodeJS, then run `npm i` in the command line under your repo folder.
-- Run `npm run dev` to compile your plugin from `main.ts` to `main.js`.
-- Make changes to `main.ts` (or create new `.ts` files). Those changes should be automatically compiled into `main.js`.
-- Reload Obsidian to load the new version of your plugin.
-- Enable plugin in settings window.
-- For updates to the Obsidian API run `npm update` in the command line under your repo folder.
+#### 1. 手动导航面板
+- 通过命令面板搜索 "Navigator: Open manual navigation panel" 或点击左侧工具栏图标
+- 选择标签查看该标签下的所有笔记
+- 支持多种排序方式：标题、修改时间、创建时间、自定义排序
+- 自定义排序模式下可以拖拽笔记进行排序
+- 点击笔记名称直接跳转到对应笔记
 
-## Releasing new releases
+#### 2. 侧边导航面板
+- 通过命令 "Navigator: Toggle Next/Prev Panel" 打开侧边面板
+- 显示所有标签及每个标签下的笔记数量
+- 为每个标签提供 Prev/Next 按钮进行快速导航
 
-- Update your `manifest.json` with your new version number, such as `1.0.1`, and the minimum Obsidian version required for your latest release.
-- Update your `versions.json` file with `"new-plugin-version": "minimum-obsidian-version"` so older versions of Obsidian can download an older version of your plugin that's compatible.
-- Create new GitHub release using your new version number as the "Tag version". Use the exact version number, don't include a prefix `v`. See here for an example: https://github.com/obsidianmd/obsidian-sample-plugin/releases
-- Upload the files `manifest.json`, `main.js`, `styles.css` as binary attachments. Note: The manifest.json file must be in two places, first the root path of your repository and also in the release.
-- Publish the release.
+#### 3. 快捷导航命令
+- `Navigator: Go to next note` - 跳转到当前笔记相同标签下的下一个笔记
+- `Navigator: Go to previous note` - 跳转到当前笔记相同标签下的上一个笔记
 
-> You can simplify the version bump process by running `npm version patch`, `npm version minor` or `npm version major` after updating `minAppVersion` manually in `manifest.json`.
-> The command will bump version in `manifest.json` and `package.json`, and add the entry for the new version to `versions.json`
+## 安装方法
 
-## Adding your plugin to the community plugin list
+### 手动安装
 
-- Check the [plugin guidelines](https://docs.obsidian.md/Plugins/Releasing/Plugin+guidelines).
-- Publish an initial version.
-- Make sure you have a `README.md` file in the root of your repo.
-- Make a pull request at https://github.com/obsidianmd/obsidian-releases to add your plugin.
+1. 下载最新的 release 文件
+2. 解压到你的 Obsidian vault 的 `.obsidian/plugins/obsidian-tag-navigator/` 目录
+3. 在 Obsidian 设置中启用 "Tag Navigator" 插件
 
-## How to use
+### 开发安装
 
-- Clone this repo.
-- Make sure your NodeJS is at least v16 (`node --version`).
-- `npm i` or `yarn` to install dependencies.
-- `npm run dev` to start compilation in watch mode.
+1. 克隆此仓库到你的 `.obsidian/plugins/` 目录
+2. 运行 `npm install` 安装依赖
+3. 运行 `npm run build` 构建插件
+4. 在 Obsidian 设置中启用插件
 
-## Manually installing the plugin
+## 使用指南
 
-- Copy over `main.js`, `styles.css`, `manifest.json` to your vault `VaultFolder/.obsidian/plugins/your-plugin-id/`.
+### 基本使用
 
-## Improve code quality with eslint (optional)
-- [ESLint](https://eslint.org/) is a tool that analyzes your code to quickly find problems. You can run ESLint against your plugin to find common bugs and ways to improve your code. 
-- To use eslint with this project, make sure to install eslint from terminal:
-  - `npm install -g eslint`
-- To use eslint to analyze this project use this command:
-  - `eslint main.ts`
-  - eslint will then create a report with suggestions for code improvement by file and line number.
-- If your source code is in a folder, such as `src`, you can use eslint with this command to analyze all files in that folder:
-  - `eslint .\src\`
+1. **确保你的笔记有标签**: 插件只对带有标签的笔记有效
+2. **打开手动导航面板**: 使用命令或点击工具栏图标
+3. **选择标签**: 从下拉菜单中选择要导航的标签
+4. **排序笔记**: 选择合适的排序方式
+5. **开始导航**: 点击笔记名称跳转，或使用 Prev/Next 按钮
 
-## Funding URL
+### 自定义排序
 
-You can include funding URLs where people who use your plugin can financially support it.
+1. 在手动导航面板中选择 "Custom Order" 排序方式
+2. 拖拽笔记到desired位置
+3. 点击 "Save Custom Order" 保存排序
+4. 自定义排序会在设置中保存，下次打开时自动加载
 
-The simple way is to set the `fundingUrl` field to your link in your `manifest.json` file:
+### 快捷键建议
 
-```json
-{
-    "fundingUrl": "https://buymeacoffee.com"
-}
-```
+建议为以下命令设置快捷键：
+- `Navigator: Go to next note` → `Ctrl+]` 或 `Cmd+]`
+- `Navigator: Go to previous note` → `Ctrl+[` 或 `Cmd+[`
+- `Navigator: Toggle Next/Prev Panel` → `Ctrl+Shift+N` 或 `Cmd+Shift+N`
 
-If you have multiple URLs, you can also do:
+## 设置选项
 
-```json
-{
-    "fundingUrl": {
-        "Buy Me a Coffee": "https://buymeacoffee.com",
-        "GitHub Sponsor": "https://github.com/sponsors",
-        "Patreon": "https://www.patreon.com/"
-    }
-}
-```
+在插件设置中可以配置：
 
-## API Documentation
+- **默认排序方式**: 选择默认的笔记排序方式
+- **管理自定义排序**: 查看和清除已保存的自定义排序
 
-See https://github.com/obsidianmd/obsidian-api
+## 技术特性
+
+- **TypeScript 开发**: 提供类型安全和更好的开发体验
+- **响应式设计**: 支持桌面和移动端
+- **性能优化**: 智能缓存和增量更新
+- **兼容性**: 支持 Obsidian v0.15.0+
+
+## 贡献
+
+欢迎提交 Issue 和 Pull Request！
+
+## 许可证
+
+MIT License
+
+## 更新日志
+
+### v1.0.0
+- 初始版本发布
+- 实现基于标签的导航功能
+- 支持多种排序方式
+- 手动导航面板和侧边面板
+- 自定义排序功能
