@@ -225,7 +225,8 @@ export default class TagNavigatorPlugin extends Plugin {
 	}
 
 	getSortOrderDescription(tag: string): string {
-		if (this.settings.sortOrder === 'custom' && this.settings.customOrder[tag]) {
+		// Fix: Always check for custom order first, regardless of sortOrder setting
+		if (this.settings.customOrder[tag] && this.settings.customOrder[tag].length > 0) {
 			return 'Custom Order';
 		}
 		
@@ -303,7 +304,8 @@ export default class TagNavigatorPlugin extends Plugin {
 	}
 
 	async sortNotes(notes: NoteData[], tag: string): Promise<NoteData[]> {
-		if (this.settings.sortOrder === 'custom' && this.settings.customOrder[tag]) {
+		// Fix: Always check for custom order first, regardless of sortOrder setting
+		if (this.settings.customOrder[tag] && this.settings.customOrder[tag].length > 0) {
 			const customOrder = this.settings.customOrder[tag];
 			return notes.sort((a, b) => {
 				const aIndex = customOrder.indexOf(a.file.path);
@@ -315,6 +317,7 @@ export default class TagNavigatorPlugin extends Plugin {
 			});
 		}
 
+		// If no custom order, use the sortOrder setting
 		switch (this.settings.sortOrder) {
 			case 'title':
 				return notes.sort((a, b) => a.title.localeCompare(b.title));
