@@ -3,7 +3,7 @@ import { TFile } from 'obsidian';
 export interface TagNavigatorSettings {
 	sortOrder: 'title' | 'modified' | 'created' | 'custom';
 	showToastMessages: boolean;
-	navigatorFolderPath: string;
+	customOrder: Record<string, string[]>; // tag -> ordered file paths
 }
 
 export interface NoteData {
@@ -22,7 +22,8 @@ export interface TagOrderData {
 export const DEFAULT_SETTINGS: TagNavigatorSettings = {
 	sortOrder: 'title',
 	showToastMessages: true,
-	navigatorFolderPath: 'navigator'
+	customOrder: {}
 };
 
-export const VIEW_TYPE_NAVIGATOR_PANEL = "navigator-panel"; 
+export const VIEW_TYPE_NAVIGATOR_PANEL = "navigator-panel";
+export const VIEW_TYPE_SETTINGS_PAGE = "tag-navigator-settings"; 

@@ -108,13 +108,10 @@ export class ManualNavigationModal extends Modal {
 			const saveButton = notesContainer.createEl("button", { text: "Save Custom Order" });
 			saveButton.onclick = async () => {
 				const noteElements = notesList.querySelectorAll('.note-item');
-				const orderedNotes = Array.from(noteElements).map(el => {
-					const path = (el as HTMLElement).dataset.path!;
-					return sortedNotes.find(note => note.file.path === path)!;
-				});
+				const customOrder = Array.from(noteElements).map(el => (el as HTMLElement).dataset.path!);
 				
-				await this.plugin.saveCustomOrder(this.selectedTag!, orderedNotes);
-				new Notice('Custom order saved to navigator folder');
+				await this.plugin.saveCustomOrder(this.selectedTag!, customOrder);
+				new Notice('Custom order saved');
 			};
 		}
 	}

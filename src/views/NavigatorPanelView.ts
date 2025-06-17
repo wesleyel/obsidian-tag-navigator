@@ -1,9 +1,10 @@
-import { ItemView, WorkspaceLeaf, Notice, getAllTags } from 'obsidian';
+import { ItemView, WorkspaceLeaf, Notice, TFile, MarkdownView } from 'obsidian';
 import { VIEW_TYPE_NAVIGATOR_PANEL } from '../types';
 import type TagNavigatorPlugin from '../../main';
 
 export class NavigatorPanelView extends ItemView {
 	plugin: TagNavigatorPlugin;
+	refreshInterval: number | null = null;
 
 	constructor(leaf: WorkspaceLeaf, plugin: TagNavigatorPlugin) {
 		super(leaf);
@@ -15,146 +16,140 @@ export class NavigatorPanelView extends ItemView {
 	}
 
 	getDisplayText() {
-		return "Tag Navigator";
+		return "Navigator Panel";
+	}
+
+	getIcon() {
+		return "navigation";
 	}
 
 	async onOpen() {
-		const container = this.containerEl.children[1];
-		container.empty();
-		container.createEl("h4", { text: "Tag Navigator" });
-
-		this.renderTagList(container);
-
-		// Refresh when files change or active file changes
-		this.registerEvent(
-			this.app.vault.on('modify', () => {
-				this.refresh();
-			})
-		);
+		this.render();
 		
-		this.registerEvent(
-			this.app.workspace.on('active-leaf-change', () => {
-				// Delay refresh to allow metadata cache to update
-				setTimeout(() => {
-					this.refresh();
-				}, 100);
-			})
-		);
-
-		// Also refresh when metadata cache is updated
-		this.registerEvent(
-			this.app.metadataCache.on('changed', () => {
-				this.refresh();
-			})
-		);
+		// Set up auto-refresh every 2 seconds
+		this.refreshInterval = window.setInterval(() => {
+			this.render();
+		}, 2000);
 	}
 
-	async refresh() {
-		const container = this.containerEl.children[1];
-		container.empty();
-		container.createEl("h4", { text: "Tag Navigator" });
-		this.renderTagList(container);
+	async onClose() {
+		if (this.refreshInterval) {
+			clearInterval(this.refreshInterval);
+			this.refreshInterval = null;
+		}
 	}
 
-	async renderTagList(container: Element) {
+	async render() {
+		const { contentEl } = this;
+		contentEl.empty();
+		contentEl.addClass('tag-navigator-panel');
+
+		const headerEl = contentEl.createEl('div', { cls: 'nav-panel-header' });
+		headerEl.createEl('h3', { text: 'Tag Navigator' });
+
 		const currentFile = this.plugin.getCurrentNote();
 		
 		if (!currentFile) {
-			container.createEl("p", { text: "No active note" });
-			// Add debug info
-			container.createEl("p", { 
-				text: "Debug: Please ensure you have a markdown file open and focused.", 
-				cls: "tag-navigator-debug" 
+			const debugInfo = contentEl.createEl('div', { cls: 'debug-info' });
+			debugInfo.createEl('p', { text: 'Debug: No active note detected' });
+			
+			const activeMarkdownView = this.app.workspace.getActiveViewOfType(MarkdownView);
+			debugInfo.createEl('p', { text: `Active view: ${activeMarkdownView ? 'Found' : 'None'}` });
+			
+			contentEl.createEl('div', { 
+				cls: 'no-active-note', 
+				text: 'No active note or note has no tags' 
 			});
 			return;
 		}
 
-		// Show current file name for debugging
-		container.createEl("p", { 
-			text: `Current: ${currentFile.basename}`, 
-			cls: "tag-navigator-current-file" 
-		});
+		// Display current file info
+		const fileInfoEl = contentEl.createEl('div', { cls: 'current-file-info' });
+		fileInfoEl.createEl('strong', { text: 'Current: ' });
+		fileInfoEl.createEl('span', { text: currentFile.basename });
 
-		const currentNoteData = this.plugin.getAllNotesWithTags().find(note => note.file.path === currentFile.path);
+		const currentNote = this.plugin.getAllNotesWithTags().find(note => note.file.path === currentFile.path);
 		
-		if (!currentNoteData || currentNoteData.tags.length === 0) {
-			container.createEl("p", { text: "Current note has no tags" });
-			// Try to get all notes and see if this file has any metadata
-			const allFiles = this.plugin.app.vault.getMarkdownFiles();
-			const targetFile = allFiles.find(f => f.path === currentFile.path);
-			if (targetFile) {
-				const cache = this.plugin.app.metadataCache.getFileCache(targetFile);
-				const debugText = cache ? `Cache found. Tags in cache: ${getAllTags(cache)?.join(', ') || 'none'}` : 'No cache found';
-				container.createEl("p", { text: `Debug: ${debugText}`, cls: "tag-navigator-debug" });
-			}
+		if (!currentNote || currentNote.tags.length === 0) {
+			contentEl.createEl('div', { 
+				cls: 'no-tags', 
+				text: 'Current note has no tags' 
+			});
 			return;
 		}
 
-		const currentNoteTags = currentNoteData.tags;
-
-		for (const tag of currentNoteTags) {
-			const tagContainer = container.createEl("div", { cls: "tag-navigator-tag" });
-			tagContainer.createEl("h5", { text: `#${tag}` });
-
-			const buttonContainer = tagContainer.createEl("div", { cls: "tag-navigator-buttons" });
+		// Display tags and navigation
+		const tagsContainer = contentEl.createEl('div', { cls: 'tags-container' });
+		
+		for (const tag of currentNote.tags) {
+			const tagEl = tagsContainer.createEl('div', { cls: 'tag-section' });
 			
-			const prevButton = buttonContainer.createEl("button", { text: "Prev" });
-			prevButton.onclick = async () => {
+			const tagHeader = tagEl.createEl('div', { cls: 'tag-header' });
+			tagHeader.createEl('span', { text: `#${tag}`, cls: 'tag-name' });
+
+			// Get notes for this tag and current position
+			const notesForTag = await this.plugin.sortNotes(this.plugin.getNotesForTag(tag), tag);
+			const currentIndex = notesForTag.findIndex(note => note.file.path === currentFile.path);
+			const totalNotes = notesForTag.length;
+
+			// Position info
+			if (currentIndex !== -1) {
+				const positionEl = tagHeader.createEl('span', { cls: 'position-info' });
+				positionEl.textContent = `[${currentIndex + 1}/${totalNotes}]`;
+			}
+
+			// Navigation buttons
+			const navButtons = tagEl.createEl('div', { cls: 'nav-buttons' });
+			
+			const prevBtn = navButtons.createEl('button', { text: 'Prev', cls: 'nav-btn prev-btn' });
+			prevBtn.onclick = async () => {
 				await this.navigateInTag(tag, 'prev');
 			};
 
-			const nextButton = buttonContainer.createEl("button", { text: "Next" });
-			nextButton.onclick = async () => {
+			const nextBtn = navButtons.createEl('button', { text: 'Next', cls: 'nav-btn next-btn' });
+			nextBtn.onclick = async () => {
 				await this.navigateInTag(tag, 'next');
 			};
 
-			// Show notes count for this tag
-			const notesCount = this.plugin.getNotesForTag(tag).length;
-			tagContainer.createEl("span", { text: `(${notesCount} notes)`, cls: "tag-navigator-count" });
-			
-			// Show current position in this tag
-			const notesForTag = await this.plugin.sortNotes(this.plugin.getNotesForTag(tag), tag);
-			const currentIndex = notesForTag.findIndex(note => note.file.path === currentFile.path);
-			if (currentIndex !== -1) {
-				tagContainer.createEl("span", { 
-					text: `[${currentIndex + 1}/${notesCount}]`, 
-					cls: "tag-navigator-position" 
-				});
+			// Show sort method
+			const sortInfo = tagEl.createEl('div', { cls: 'sort-info' });
+			let sortText = 'Default';
+			if (this.plugin.settings.sortOrder === 'custom' && this.plugin.settings.customOrder[tag]) {
+				sortText = 'Custom';
+			} else if (this.plugin.settings.sortOrder !== 'title') {
+				sortText = this.plugin.settings.sortOrder.charAt(0).toUpperCase() + this.plugin.settings.sortOrder.slice(1);
 			}
+			sortInfo.textContent = `Sort: ${sortText}`;
 		}
 	}
 
 	async navigateInTag(tag: string, direction: 'next' | 'prev') {
 		const currentFile = this.plugin.getCurrentNote();
-		if (!currentFile) {
-					new Notice('No active note');
-			return;
-		}
+		if (!currentFile) return;
 
 		const notesForTag = await this.plugin.sortNotes(this.plugin.getNotesForTag(tag), tag);
-		if (notesForTag.length === 0) return;
-
 		const currentIndex = notesForTag.findIndex(note => note.file.path === currentFile.path);
 		
+		if (currentIndex === -1) return;
+
 		let targetIndex: number;
-		if (currentIndex === -1) {
-			// Current file not in this tag, go to first note
-			targetIndex = 0;
+		if (direction === 'next') {
+			targetIndex = (currentIndex + 1) % notesForTag.length;
 		} else {
-			if (direction === 'next') {
-				targetIndex = (currentIndex + 1) % notesForTag.length;
-			} else {
-				targetIndex = currentIndex === 0 ? notesForTag.length - 1 : currentIndex - 1;
-			}
+			targetIndex = currentIndex === 0 ? notesForTag.length - 1 : currentIndex - 1;
 		}
 
 		const targetFile = notesForTag[targetIndex].file;
 		await this.app.workspace.getLeaf().openFile(targetFile);
 		
-		new Notice(`${direction === 'next' ? 'Next' : 'Previous'} in #${tag}: ${targetFile.basename}`);
-	}
+		if (this.plugin.settings.showToastMessages) {
+			const directionText = direction === 'next' ? 'Next' : 'Previous';
+			new Notice(`${directionText}: ${targetFile.basename}`);
+		}
 
-	async onClose() {
-		// Nothing to clean up
+		// Refresh the panel after navigation
+		setTimeout(() => {
+			this.render();
+		}, 100);
 	}
 } 

@@ -6,23 +6,16 @@ import {
 	getAllTags
 } from 'obsidian';
 
-import { TagNavigatorSettings, DEFAULT_SETTINGS, NoteData, VIEW_TYPE_NAVIGATOR_PANEL } from './src/types';
-import { FileManager } from './src/utils/FileManager';
+import { TagNavigatorSettings, DEFAULT_SETTINGS, NoteData, VIEW_TYPE_NAVIGATOR_PANEL, VIEW_TYPE_SETTINGS_PAGE } from './src/types';
 import { NavigatorPanelView } from './src/views/NavigatorPanelView';
 import { ManualNavigationModal } from './src/views/ManualNavigationModal';
-import { TagNavigatorSettingTab } from './src/settings/TagNavigatorSettingTab';
-
-
+import { SettingsPageView } from './src/views/SettingsPageView';
 
 export default class TagNavigatorPlugin extends Plugin {
 	settings: TagNavigatorSettings;
-	fileManager: FileManager;
 
 	async onload() {
 		await this.loadSettings();
-		
-		// Initialize file manager
-		this.fileManager = new FileManager(this.app, this.settings.navigatorFolderPath);
 
 		// Register view types
 		this.registerView(
@@ -30,9 +23,14 @@ export default class TagNavigatorPlugin extends Plugin {
 			(leaf) => new NavigatorPanelView(leaf, this)
 		);
 
-		// Add ribbon icon for manual navigation panel
-		this.addRibbonIcon('navigation', 'Open Tag Navigator', () => {
-			new ManualNavigationModal(this.app, this).open();
+		this.registerView(
+			VIEW_TYPE_SETTINGS_PAGE,
+			(leaf) => new SettingsPageView(leaf, this)
+		);
+
+		// Add ribbon icon for settings page
+		this.addRibbonIcon('settings', 'Open Tag Navigator Settings', () => {
+			this.activateSettingsPage();
 		});
 
 		// Command to open manual navigation panel
@@ -41,6 +39,15 @@ export default class TagNavigatorPlugin extends Plugin {
 			name: 'Navigator: Open manual navigation panel',
 			callback: () => {
 				new ManualNavigationModal(this.app, this).open();
+			}
+		});
+
+		// Command to open settings page
+		this.addCommand({
+			id: 'open-settings-page',
+			name: 'Navigator: Open settings page',
+			callback: () => {
+				this.activateSettingsPage();
 			}
 		});
 
@@ -69,13 +76,11 @@ export default class TagNavigatorPlugin extends Plugin {
 				this.navigateToPrev();
 			}
 		});
-
-		// Add settings tab
-		this.addSettingTab(new TagNavigatorSettingTab(this.app, this));
 	}
 
 	onunload() {
 		this.app.workspace.detachLeavesOfType(VIEW_TYPE_NAVIGATOR_PANEL);
+		this.app.workspace.detachLeavesOfType(VIEW_TYPE_SETTINGS_PAGE);
 	}
 
 	async loadSettings() {
@@ -84,10 +89,6 @@ export default class TagNavigatorPlugin extends Plugin {
 
 	async saveSettings() {
 		await this.saveData(this.settings);
-		// Update file manager path if changed
-		if (this.fileManager) {
-			this.fileManager = new FileManager(this.app, this.settings.navigatorFolderPath);
-		}
 	}
 
 	async activateNavigatorPanel() {
@@ -105,6 +106,22 @@ export default class TagNavigatorPlugin extends Plugin {
 				await leaf.setViewState({ type: VIEW_TYPE_NAVIGATOR_PANEL, active: true });
 				workspace.revealLeaf(leaf);
 			}
+		}
+	}
+
+	async activateSettingsPage() {
+		const { workspace } = this.app;
+		
+		const leaves = workspace.getLeavesOfType(VIEW_TYPE_SETTINGS_PAGE);
+
+		if (leaves.length > 0) {
+			// If page exists, focus it
+			workspace.revealLeaf(leaves[0]);
+		} else {
+			// Create new page
+			const leaf = workspace.getLeaf('tab');
+			await leaf.setViewState({ type: VIEW_TYPE_SETTINGS_PAGE, active: true });
+			workspace.revealLeaf(leaf);
 		}
 	}
 
@@ -138,18 +155,16 @@ export default class TagNavigatorPlugin extends Plugin {
 	}
 
 	async sortNotes(notes: NoteData[], tag: string): Promise<NoteData[]> {
-		if (this.settings.sortOrder === 'custom') {
-			const customOrder = await this.fileManager.loadTagOrder(tag);
-			if (customOrder && customOrder.notes.length > 0) {
-				return notes.sort((a, b) => {
-					const aIndex = customOrder.notes.indexOf(a.file.path);
-					const bIndex = customOrder.notes.indexOf(b.file.path);
-					if (aIndex === -1 && bIndex === -1) return 0;
-					if (aIndex === -1) return 1;
-					if (bIndex === -1) return -1;
-					return aIndex - bIndex;
-				});
-			}
+		if (this.settings.sortOrder === 'custom' && this.settings.customOrder[tag]) {
+			const customOrder = this.settings.customOrder[tag];
+			return notes.sort((a, b) => {
+				const aIndex = customOrder.indexOf(a.file.path);
+				const bIndex = customOrder.indexOf(b.file.path);
+				if (aIndex === -1 && bIndex === -1) return 0;
+				if (aIndex === -1) return 1;
+				if (bIndex === -1) return -1;
+				return aIndex - bIndex;
+			});
 		}
 
 		switch (this.settings.sortOrder) {
@@ -164,14 +179,9 @@ export default class TagNavigatorPlugin extends Plugin {
 		}
 	}
 
-	async saveCustomOrder(tag: string, notes: NoteData[]): Promise<void> {
-		const tagOrderData = {
-			tag,
-			sortOrder: 'custom' as const,
-			notes: notes.map(note => note.file.path)
-		};
-		
-		await this.fileManager.saveTagOrder(tagOrderData, notes);
+	async saveCustomOrder(tag: string, filePaths: string[]): Promise<void> {
+		this.settings.customOrder[tag] = filePaths;
+		await this.saveSettings();
 	}
 
 	getCurrentNote(): TFile | null {
