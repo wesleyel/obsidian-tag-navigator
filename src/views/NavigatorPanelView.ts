@@ -112,10 +112,25 @@ export class NavigatorPanelView extends ItemView {
 			// Show sort method
 			const sortInfo = tagEl.createEl('div', { cls: 'sort-info' });
 			let sortText = 'Default';
-			if (this.plugin.settings.sortOrder === 'custom' && this.plugin.settings.customOrder[tag]) {
+			
+			// 检查是否有自定义排序（优先级最高）
+			if (this.plugin.settings.customOrder[tag] && this.plugin.settings.customOrder[tag].length > 0) {
 				sortText = 'Custom';
-			} else if (this.plugin.settings.sortOrder !== 'title') {
-				sortText = this.plugin.settings.sortOrder.charAt(0).toUpperCase() + this.plugin.settings.sortOrder.slice(1);
+			} else {
+				// 使用全局排序设置
+				switch (this.plugin.settings.sortOrder) {
+					case 'title':
+						sortText = 'Title';
+						break;
+					case 'modified':
+						sortText = 'Modified';
+						break;
+					case 'created':
+						sortText = 'Created';
+						break;
+					default:
+						sortText = 'Default';
+				}
 			}
 			sortInfo.textContent = `Sort: ${sortText}`;
 		}
