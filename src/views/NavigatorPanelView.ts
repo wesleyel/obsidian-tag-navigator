@@ -20,7 +20,7 @@ export class NavigatorPanelView extends ItemView {
 	}
 
 	getIcon() {
-		return "navigation";
+		return "compass";
 	}
 
 	async onOpen() {

@@ -21,7 +21,7 @@ export class SettingsPageView extends ItemView {
 	}
 
 	getIcon() {
-		return "settings";
+		return "sliders-horizontal";
 	}
 
 	async onOpen() {
@@ -78,6 +78,43 @@ export class SettingsPageView extends ItemView {
 					this.plugin.settings.showToastMessages = value;
 					await this.plugin.saveSettings();
 				}));
+
+		new Setting(settingsContainer)
+			.setName('Export Folder Path')
+			.setDesc('Folder where exported tag notes will be saved')
+			.addText(text => text
+				.setPlaceholder('tag-exports')
+				.setValue(this.plugin.settings.exportFolderPath)
+				.onChange(async (value) => {
+					this.plugin.settings.exportFolderPath = value || 'tag-exports';
+					await this.plugin.saveSettings();
+				}));
+
+		// Export section
+		const exportSection = settingsContainer.createEl('div', { cls: 'export-section' });
+		exportSection.createEl('h3', { text: 'Export Functions' });
+		exportSection.createEl('p', { 
+			text: 'Export tags as numbered list notes in the specified folder',
+			cls: 'setting-item-description'
+		});
+
+		const exportButtons = exportSection.createEl('div', { cls: 'export-buttons' });
+		
+		const exportAllBtn = exportButtons.createEl('button', { 
+			text: 'Export All Tags',
+			cls: 'mod-cta'
+		});
+		exportAllBtn.onclick = async () => {
+			exportAllBtn.disabled = true;
+			exportAllBtn.textContent = 'Exporting...';
+			
+			try {
+				await this.plugin.exportAllTags();
+			} finally {
+				exportAllBtn.disabled = false;
+				exportAllBtn.textContent = 'Export All Tags';
+			}
+		};
 	}
 
 	renderTagList(container: Element) {
@@ -160,6 +197,23 @@ export class SettingsPageView extends ItemView {
 		});
 		sortByNameBtn.onclick = async () => {
 			await this.sortByName();
+		};
+
+		// Export button for current tag
+		const exportBtn = actionsEl.createEl('button', { 
+			text: `Export #${this.selectedTag}`,
+			cls: 'mod-warning'
+		});
+		exportBtn.onclick = async () => {
+			exportBtn.disabled = true;
+			exportBtn.textContent = 'Exporting...';
+			
+			try {
+				await this.plugin.exportSingleTag(this.selectedTag!);
+			} finally {
+				exportBtn.disabled = false;
+				exportBtn.textContent = `Export #${this.selectedTag}`;
+			}
 		};
 
 		// Notes list

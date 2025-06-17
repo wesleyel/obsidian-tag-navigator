@@ -4,6 +4,7 @@ export interface TagNavigatorSettings {
 	sortOrder: 'title' | 'modified' | 'created' | 'custom';
 	showToastMessages: boolean;
 	customOrder: Record<string, string[]>; // tag -> ordered file paths
+	exportFolderPath: string; // 导出文件夹路径
 }
 
 export interface NoteData {
@@ -22,7 +23,8 @@ export interface TagOrderData {
 export const DEFAULT_SETTINGS: TagNavigatorSettings = {
 	sortOrder: 'title',
 	showToastMessages: true,
-	customOrder: {}
+	customOrder: {},
+	exportFolderPath: 'tag-exports' // 默认导出文件夹
 };
 
 export const VIEW_TYPE_NAVIGATOR_PANEL = "navigator-panel";
