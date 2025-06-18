@@ -29,6 +29,12 @@ obsidian-tag-navigator/
 ├── src/
 │   ├── types/
 │   │   └── index.ts                # 类型定义
+│   ├── utils/                      # 工具函数模块
+│   │   ├── index.ts               # 工具函数统一导出
+│   │   ├── noteUtils.ts           # 笔记相关工具函数
+│   │   ├── sortUtils.ts           # 排序相关工具函数
+│   │   ├── exportUtils.ts         # 导出相关工具函数
+│   │   └── navigationUtils.ts     # 导航相关工具函数
 │   └── views/
 │       ├── NavigatorPanelView.ts   # 侧边面板视图
 │       ├── ManualNavigationModal.ts # 手动导航模态框
@@ -69,6 +75,7 @@ obsidian-tag-navigator/
 - [x] **模块化架构**
   - ✅ 类型定义分离 (`src/types/index.ts`)
   - ✅ 视图组件分离 (`src/views/`)
+  - ✅ 工具函数模块化 (`src/utils/`)
   - ✅ 简化的文件结构
 
 - [x] **用户界面增强**
@@ -107,20 +114,26 @@ obsidian-tag-navigator/
 1. **TagNavigatorPlugin** (`main.ts`)
    - 插件主入口
    - 命令注册和视图管理
-   - 导航逻辑实现
-   - JSON 配置管理
+   - 插件生命周期管理
+   - 设置管理
 
-2. **NavigatorPanelView** (`src/views/NavigatorPanelView.ts`)
+2. **工具函数模块** (`src/utils/`)
+   - **NoteUtils** (`noteUtils.ts`): 笔记获取、标签处理
+   - **SortUtils** (`sortUtils.ts`): 排序逻辑和排序描述
+   - **ExportUtils** (`exportUtils.ts`): 标签导出功能
+   - **NavigationUtils** (`navigationUtils.ts`): 前进后退导航
+
+3. **NavigatorPanelView** (`src/views/NavigatorPanelView.ts`)
    - 侧边面板界面
    - 实时显示当前笔记标签
    - Prev/Next 导航按钮
 
-3. **ManualNavigationModal** (`src/views/ManualNavigationModal.ts`)
+4. **ManualNavigationModal** (`src/views/ManualNavigationModal.ts`)
    - 手动排序界面
    - 拖拽排序功能
    - 自定义排序保存
 
-4. **SettingsPageView** (`src/views/SettingsPageView.ts`)
+5. **SettingsPageView** (`src/views/SettingsPageView.ts`)
    - 双栏设置界面
    - 左侧标签列表
    - 右侧拖拽排序
@@ -190,6 +203,11 @@ Total Notes: 5
 - ✅ 响应式用户界面
 - ✅ 标签导出功能（批量/单个）
 - ✅ 自动生成 numbered list 笔记
+- ✅ **代码重构优化**
+  - ✅ 将 main.ts 中的功能函数拆分到 utils 模块
+  - ✅ 按功能分类：笔记处理、排序、导出、导航
+  - ✅ 提高代码可维护性和可测试性
+  - ✅ 保持向后兼容性
 
 ## 待优化项目
 
