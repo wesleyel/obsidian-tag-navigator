@@ -93,12 +93,12 @@ If your plugin does not need CSS, delete this file.
 }
 
 .sortable-notes-list {
-    max-height: 400px;
-    overflow-y: auto;
     border: 1px solid var(--background-modifier-border);
     border-radius: 6px;
-    padding: 8px;
-    background-color: var(--background-primary);
+    overflow: hidden;
+    margin-bottom: 20px;
+    max-height: 400px;
+    overflow-y: auto;
 }
 
 .note-item {
@@ -385,7 +385,8 @@ If your plugin does not need CSS, delete this file.
 .settings-layout {
 	display: flex;
 	gap: 20px;
-	height: 600px;
+	height: calc(100vh - 200px);
+	min-height: 400px;
 }
 
 .settings-left-panel {
@@ -394,6 +395,7 @@ If your plugin does not need CSS, delete this file.
 	border-radius: 8px;
 	padding: 20px;
 	overflow-y: auto;
+	position: relative;
 }
 
 .settings-right-panel {
@@ -402,6 +404,7 @@ If your plugin does not need CSS, delete this file.
 	border-radius: 8px;
 	padding: 20px;
 	overflow-y: auto;
+	position: relative;
 }
 
 .panel-header {
@@ -501,13 +504,6 @@ If your plugin does not need CSS, delete this file.
 	gap: 10px;
 	margin-bottom: 20px;
 	flex-wrap: wrap;
-}
-
-.sortable-notes-list {
-	border: 1px solid var(--background-modifier-border);
-	border-radius: 6px;
-	overflow: hidden;
-	margin-bottom: 20px;
 }
 
 .note-item {

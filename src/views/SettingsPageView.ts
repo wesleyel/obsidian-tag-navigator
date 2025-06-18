@@ -105,8 +105,11 @@ export class SettingsPageView extends ItemView {
 		sortByNameBtn.onclick = () => {
 			if (this.tagSortMode !== 'name') {
 				this.tagSortMode = 'name';
-				this.isRendering = false; // Reset before re-render
-				this.renderTagList(container);
+				// Use setTimeout to avoid immediate re-render
+				setTimeout(() => {
+					this.isRendering = false;
+					this.renderTagList(container);
+				}, 0);
 			}
 		};
 
@@ -117,8 +120,11 @@ export class SettingsPageView extends ItemView {
 		sortByCountBtn.onclick = () => {
 			if (this.tagSortMode !== 'count') {
 				this.tagSortMode = 'count';
-				this.isRendering = false; // Reset before re-render
-				this.renderTagList(container);
+				// Use setTimeout to avoid immediate re-render
+				setTimeout(() => {
+					this.isRendering = false;
+					this.renderTagList(container);
+				}, 0);
 			}
 		};
 
@@ -129,8 +135,11 @@ export class SettingsPageView extends ItemView {
 		sortByCustomBtn.onclick = () => {
 			if (this.tagSortMode !== 'custom') {
 				this.tagSortMode = 'custom';
-				this.isRendering = false; // Reset before re-render
-				this.renderTagList(container);
+				// Use setTimeout to avoid immediate re-render
+				setTimeout(() => {
+					this.isRendering = false;
+					this.renderTagList(container);
+				}, 0);
 			}
 		};
 
@@ -138,6 +147,7 @@ export class SettingsPageView extends ItemView {
 		
 		if (tags.length === 0) {
 			container.createEl('p', { text: 'No tags found', cls: 'empty-state' });
+			this.isRendering = false;
 			return;
 		}
 
@@ -172,9 +182,12 @@ export class SettingsPageView extends ItemView {
 			tagItem.onclick = async () => {
 				if (this.selectedTag !== tag) {
 					this.selectedTag = tag;
-					this.isRendering = false; // Reset before re-render
-					this.renderTagList(container);
-					await this.renderNoteOrdering(container.parentElement!.querySelector('.settings-right-panel')!);
+					// Use setTimeout to avoid immediate re-render
+					setTimeout(async () => {
+						this.isRendering = false;
+						this.renderTagList(container);
+						await this.renderNoteOrdering(container.parentElement!.querySelector('.settings-right-panel')!);
+					}, 0);
 				}
 			};
 		}
@@ -309,14 +322,17 @@ export class SettingsPageView extends ItemView {
 				await this.plugin.saveSettings();
 				new Notice('Custom order cleared');
 				
-				// Only re-render the left panel to update indicators
-				const leftPanel = this.containerEl.querySelector('.settings-left-panel');
-				if (leftPanel) {
-					this.isRendering = false; // Reset before re-render
-					this.renderTagList(leftPanel);
-				}
-				// Re-render right panel without the clear button
-				await this.renderNoteOrdering(container);
+				// Use setTimeout to avoid immediate re-render
+				setTimeout(async () => {
+					// Only re-render the left panel to update indicators
+					const leftPanel = this.containerEl.querySelector('.settings-left-panel');
+					if (leftPanel) {
+						this.isRendering = false; // Reset before re-render
+						this.renderTagList(leftPanel);
+					}
+					// Re-render right panel without the clear button
+					await this.renderNoteOrdering(container);
+				}, 0);
 			};
 		}
 	}
@@ -358,18 +374,21 @@ export class SettingsPageView extends ItemView {
 		
 		// Only re-render if we provided sorted notes (manual sort)
 		if (sortedNotes) {
-			// Only re-render the tag list to update indicators
-			const leftPanel = this.containerEl.querySelector('.settings-left-panel');
-			if (leftPanel) {
-				this.isRendering = false; // Reset before re-render
-				this.renderTagList(leftPanel);
-			}
-			
-			// Re-render right panel to show updated order
-			const rightPanel = this.containerEl.querySelector('.settings-right-panel');
-			if (rightPanel) {
-				await this.renderNoteOrdering(rightPanel);
-			}
+			// Use setTimeout to avoid immediate re-render
+			setTimeout(async () => {
+				// Only re-render the tag list to update indicators
+				const leftPanel = this.containerEl.querySelector('.settings-left-panel');
+				if (leftPanel) {
+					this.isRendering = false; // Reset before re-render
+					this.renderTagList(leftPanel);
+				}
+				
+				// Re-render right panel to show updated order
+				const rightPanel = this.containerEl.querySelector('.settings-right-panel');
+				if (rightPanel) {
+					await this.renderNoteOrdering(rightPanel);
+				}
+			}, 0);
 		}
 	}
 
@@ -398,12 +417,15 @@ export class SettingsPageView extends ItemView {
 		await this.plugin.saveSettings();
 		
 		new Notice('Custom order saved');
-		// Only re-render the left panel to show the custom order indicator
-		const leftPanel = this.containerEl.querySelector('.settings-left-panel');
-		if (leftPanel) {
-			this.isRendering = false; // Reset before re-render
-			this.renderTagList(leftPanel);
-		}
+		// Use setTimeout to avoid immediate re-render
+		setTimeout(() => {
+			// Only re-render the left panel to show the custom order indicator
+			const leftPanel = this.containerEl.querySelector('.settings-left-panel');
+			if (leftPanel) {
+				this.isRendering = false; // Reset before re-render
+				this.renderTagList(leftPanel);
+			}
+		}, 0);
 	}
 
 	addDragHandlers(element: HTMLElement, container: HTMLElement) {
@@ -411,12 +433,16 @@ export class SettingsPageView extends ItemView {
 			this.draggedElement = element;
 			element.style.opacity = '0.5';
 			element.classList.add('dragging');
+			// Prevent any rendering during drag
+			this.isRendering = true;
 		});
 
 		element.addEventListener('dragend', (e) => {
 			element.style.opacity = '1';
 			element.classList.remove('dragging');
 			this.draggedElement = null;
+			// Re-enable rendering after drag
+			this.isRendering = false;
 			
 			// Note: Don't auto-save here to avoid re-rendering issues
 			// User can manually save or we save when they leave the page
