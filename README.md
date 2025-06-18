@@ -55,6 +55,15 @@ An intelligent navigation plugin for Obsidian that provides smart next/previous 
 - **Export filename format**: Customize export file naming (supports `{tag}` placeholder)
 
 ### Tag Management Page
+
+<table>
+  <tr>
+    <td><img src="./assets/tag-management-page.png" alt="Tag Management Page" width="300"></td>
+    <td><img src="./assets/side-panel.png" alt="Side Panel" width="300"></td>
+    <td><img src="./assets/exported-tag-note.png" alt="Exported Tag Note" width="300"></td>
+  </tr>
+</table>
+
 - **Left panel**: Tag list with three sorting modes:
   - By name (alphabetical)
   - By count (number of notes)
