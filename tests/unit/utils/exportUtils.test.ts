@@ -148,6 +148,52 @@ describe('ExportUtils', () => {
       expect(content).toContain('2. [[Note A]]');
       expect(content).toContain('3. [[Note C]]');
     });
+
+    it('should exclude the export file itself from the notes list', async () => {
+      // Add the export file itself to the notes list to test filtering
+      const exportFileNote: NoteData = {
+        file: { path: 'exports/tag-research.md', basename: 'tag-research', name: 'tag-research', extension: 'md', vault: {}, parent: null, stat: { mtime: 3000, ctime: 1500, size: 300 } } as any,
+        tags: ['research'],
+        frontmatter: {},
+        title: 'tag-research'
+      };
+      
+      const notesWithExportFile = [...mockNotes, exportFileNote];
+      mockApp.vault.getAbstractFileByPath.mockReturnValue(null);
+
+      await ExportUtils.exportTagToNote(
+        mockApp, 'research', notesWithExportFile, 'exports', 'tag-{tag}.md', 'title', {}
+      );
+
+      const createCall = mockApp.vault.create.mock.calls[0];
+      const content = createCall[1];
+      
+      // Should not contain the export file itself
+      expect(content).not.toContain('[[tag-research]]');
+      // Should still contain other notes
+      expect(content).toContain('[[Note A]]');
+      expect(content).toContain('[[Note B]]');
+      expect(content).toContain('[[Note C]]');
+      // Total count should be 3, not 4
+      expect(content).toContain('Total Notes: 3');
+    });
+
+    it('should return false when only export file itself is in notes list', async () => {
+      const exportFileNote: NoteData = {
+        file: { path: 'exports/tag-research.md', basename: 'tag-research', name: 'tag-research', extension: 'md', vault: {}, parent: null, stat: { mtime: 3000, ctime: 1500, size: 300 } } as any,
+        tags: ['research'],
+        frontmatter: {},
+        title: 'tag-research'
+      };
+
+      const result = await ExportUtils.exportTagToNote(
+        mockApp, 'research', [exportFileNote], 'exports', 'tag-{tag}.md', 'title', {}
+      );
+
+      expect(result).toBe(false);
+      expect(mockApp.vault.create).not.toHaveBeenCalled();
+      expect(mockApp.vault.modify).not.toHaveBeenCalled();
+    });
   });
 
   describe('generateTagNoteContent', () => {

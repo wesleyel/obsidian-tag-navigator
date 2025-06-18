@@ -38,9 +38,17 @@ export class ExportUtils {
 			return false;
 		}
 
-		const sortedNotes = await SortUtils.sortNotes([...notes], tag, sortOrder, customOrder);
 		const exportFileName = this.generateFileName(exportFileNameFormat, tag);
 		const exportPath = `${exportFolderPath}/${exportFileName}`;
+
+		// Filter out the export file itself from the notes list
+		const filteredNotes = notes.filter(note => note.file.path !== exportPath);
+		
+		if (filteredNotes.length === 0) {
+			return false;
+		}
+
+		const sortedNotes = await SortUtils.sortNotes([...filteredNotes], tag, sortOrder, customOrder);
 
 		// Generate markdown content
 		const content = this.generateTagNoteContent(tag, sortedNotes, sortOrder, customOrder);
