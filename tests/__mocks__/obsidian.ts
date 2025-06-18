@@ -18,7 +18,7 @@ export class TFile {
   constructor(path: string, basename?: string) {
     this.path = path;
     this.basename = basename || path.replace('.md', '').split('/').pop() || '';
-    this.name = this.basename;
+    this.name = basename || this.basename;
     this.extension = 'md';
     this.vault = {};
     this.parent = null;
@@ -229,7 +229,7 @@ export class WorkspaceLeaf {
   }
 }
 
-const mockVault = {
+export const mockVault = {
   getMarkdownFiles: jest.fn().mockReturnValue([]),
   getAbstractFileByPath: jest.fn().mockReturnValue(null),
   create: jest.fn().mockResolvedValue(new TFile('test.md', 'test')),

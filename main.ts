@@ -11,6 +11,7 @@ import { TagNavigatorSettings, DEFAULT_SETTINGS, NoteData, VIEW_TYPE_NAVIGATOR_P
 import { NavigatorPanelView } from './src/views/NavigatorPanelView';
 import { ManualNavigationModal } from './src/views/ManualNavigationModal';
 import { SettingsPageView } from './src/views/SettingsPageView';
+import { TagNavigatorSettingTab } from './src/views/SettingsTab';
 import { NoteUtils, SortUtils, ExportUtils, NavigationUtils } from './src/utils';
 
 export default class TagNavigatorPlugin extends Plugin {
@@ -18,6 +19,9 @@ export default class TagNavigatorPlugin extends Plugin {
 
 	async onload() {
 		await this.loadSettings();
+
+		// Add settings tab
+		this.addSettingTab(new TagNavigatorSettingTab(this.app, this));
 
 		// Register view types
 		this.registerView(
@@ -47,7 +51,7 @@ export default class TagNavigatorPlugin extends Plugin {
 		// Command to open settings page
 		this.addCommand({
 			id: 'open-settings-page',
-			name: 'Navigator: Open settings page',
+			name: 'Navigator: Open tag ordering page',
 			callback: () => {
 				this.activateSettingsPage();
 			}

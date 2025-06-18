@@ -2,10 +2,15 @@ import { ItemView, WorkspaceLeaf, Setting, Notice } from 'obsidian';
 import { VIEW_TYPE_SETTINGS_PAGE, NoteData } from '../types';
 import type TagNavigatorPlugin from '../../main';
 
+type TagSortMode = 'name' | 'count' | 'custom';
+
 export class SettingsPageView extends ItemView {
 	plugin: TagNavigatorPlugin;
 	selectedTag: string | null = null;
 	currentNotes: NoteData[] = [];
+	tagSortMode: TagSortMode = 'name';
+	private isRendering: boolean = false;
+	private draggedElement: HTMLElement | null = null;
 
 	constructor(leaf: WorkspaceLeaf, plugin: TagNavigatorPlugin) {
 		super(leaf);
@@ -17,7 +22,7 @@ export class SettingsPageView extends ItemView {
 	}
 
 	getDisplayText() {
-		return "Tag Navigator Settings";
+		return "Tag Navigator - Tag Ordering";
 	}
 
 	getIcon() {
@@ -35,10 +40,10 @@ export class SettingsPageView extends ItemView {
 
 		// Page header
 		const headerEl = contentEl.createEl('div', { cls: 'settings-page-header' });
-		headerEl.createEl('h2', { text: 'Tag Navigator Settings' });
+		headerEl.createEl('h2', { text: 'Tag Navigator - Tag Ordering' });
 
-		// Main settings
-		this.renderMainSettings(contentEl);
+		// Export All Tags section
+		this.renderExportSection(contentEl);
 
 		// Two-column layout container
 		const layoutEl = contentEl.createEl('div', { cls: 'settings-layout' });
@@ -52,57 +57,8 @@ export class SettingsPageView extends ItemView {
 		await this.renderNoteOrdering(rightPanel);
 	}
 
-	renderMainSettings(container: Element) {
-		const settingsContainer = container.createEl('div', { cls: 'main-settings' });
-
-		new Setting(settingsContainer)
-			.setName('Default Sort Order')
-			.setDesc('Choose how notes should be sorted by default')
-			.addDropdown(dropdown => dropdown
-				.addOption('title', 'Title')
-				.addOption('modified', 'Last Modified')
-				.addOption('created', 'Created Date')
-				.addOption('custom', 'Custom Order')
-				.setValue(this.plugin.settings.sortOrder)
-				.onChange(async (value) => {
-					this.plugin.settings.sortOrder = value as any;
-					await this.plugin.saveSettings();
-				}));
-
-		new Setting(settingsContainer)
-			.setName('Show Toast Messages')
-			.setDesc('Show notification messages when navigating between notes')
-			.addToggle(toggle => toggle
-				.setValue(this.plugin.settings.showToastMessages)
-				.onChange(async (value) => {
-					this.plugin.settings.showToastMessages = value;
-					await this.plugin.saveSettings();
-				}));
-
-		new Setting(settingsContainer)
-			.setName('Export Folder Path')
-			.setDesc('Folder where exported tag notes will be saved')
-			.addText(text => text
-				.setPlaceholder('tag-exports')
-				.setValue(this.plugin.settings.exportFolderPath)
-				.onChange(async (value) => {
-					this.plugin.settings.exportFolderPath = value || 'tag-exports';
-					await this.plugin.saveSettings();
-				}));
-
-		new Setting(settingsContainer)
-			.setName('Export File Name Format')
-			.setDesc('Format for exported file names. Use {tag} as placeholder for the tag name.')
-			.addText(text => text
-				.setPlaceholder('tag-{tag}.md')
-				.setValue(this.plugin.settings.exportFileNameFormat)
-				.onChange(async (value) => {
-					this.plugin.settings.exportFileNameFormat = value || 'tag-{tag}.md';
-					await this.plugin.saveSettings();
-				}));
-
-		// Export section
-		const exportSection = settingsContainer.createEl('div', { cls: 'export-section' });
+	renderExportSection(container: Element) {
+		const exportSection = container.createEl('div', { cls: 'export-section' });
 		exportSection.createEl('h3', { text: 'Export Functions' });
 		exportSection.createEl('p', { 
 			text: 'Export tags as numbered list notes in the specified folder',
@@ -129,12 +85,56 @@ export class SettingsPageView extends ItemView {
 	}
 
 	renderTagList(container: Element) {
+		if (this.isRendering) {
+			return; // Prevent recursive rendering
+		}
+		
+		this.isRendering = true;
 		container.empty();
 		
 		const headerEl = container.createEl('div', { cls: 'panel-header' });
 		headerEl.createEl('h3', { text: 'Tags' });
 
-		const tags = this.plugin.getAllTags();
+		// Tag sort controls
+		const sortControlsEl = container.createEl('div', { cls: 'tag-sort-controls' });
+		
+		const sortByNameBtn = sortControlsEl.createEl('button', { 
+			text: 'Name',
+			cls: this.tagSortMode === 'name' ? 'mod-cta' : ''
+		});
+		sortByNameBtn.onclick = () => {
+			if (this.tagSortMode !== 'name') {
+				this.tagSortMode = 'name';
+				this.isRendering = false; // Reset before re-render
+				this.renderTagList(container);
+			}
+		};
+
+		const sortByCountBtn = sortControlsEl.createEl('button', { 
+			text: 'Count',
+			cls: this.tagSortMode === 'count' ? 'mod-cta' : ''
+		});
+		sortByCountBtn.onclick = () => {
+			if (this.tagSortMode !== 'count') {
+				this.tagSortMode = 'count';
+				this.isRendering = false; // Reset before re-render
+				this.renderTagList(container);
+			}
+		};
+
+		const sortByCustomBtn = sortControlsEl.createEl('button', { 
+			text: 'Custom',
+			cls: this.tagSortMode === 'custom' ? 'mod-cta' : ''
+		});
+		sortByCustomBtn.onclick = () => {
+			if (this.tagSortMode !== 'custom') {
+				this.tagSortMode = 'custom';
+				this.isRendering = false; // Reset before re-render
+				this.renderTagList(container);
+			}
+		};
+
+		const tags = this.getSortedTags();
 		
 		if (tags.length === 0) {
 			container.createEl('p', { text: 'No tags found', cls: 'empty-state' });
@@ -170,10 +170,40 @@ export class SettingsPageView extends ItemView {
 			});
 
 			tagItem.onclick = async () => {
-				this.selectedTag = tag;
-				this.renderTagList(container);
-				await this.renderNoteOrdering(container.parentElement!.querySelector('.settings-right-panel')!);
+				if (this.selectedTag !== tag) {
+					this.selectedTag = tag;
+					this.isRendering = false; // Reset before re-render
+					this.renderTagList(container);
+					await this.renderNoteOrdering(container.parentElement!.querySelector('.settings-right-panel')!);
+				}
 			};
+		}
+		
+		this.isRendering = false;
+	}
+
+	getSortedTags(): string[] {
+		const tags = this.plugin.getAllTags();
+		
+		switch (this.tagSortMode) {
+			case 'name':
+				return tags.sort();
+			case 'count':
+				return tags.sort((a, b) => {
+					const countA = this.plugin.getNotesForTag(a).length;
+					const countB = this.plugin.getNotesForTag(b).length;
+					return countB - countA; // Descending order
+				});
+			case 'custom':
+				return tags.sort((a, b) => {
+					const hasCustomA = !!this.plugin.settings.customOrder[a];
+					const hasCustomB = !!this.plugin.settings.customOrder[b];
+					if (hasCustomA && !hasCustomB) return -1;
+					if (!hasCustomA && hasCustomB) return 1;
+					return a.localeCompare(b);
+				});
+			default:
+				return tags;
 		}
 	}
 
@@ -278,9 +308,15 @@ export class SettingsPageView extends ItemView {
 				delete this.plugin.settings.customOrder[this.selectedTag!];
 				await this.plugin.saveSettings();
 				new Notice('Custom order cleared');
-				// Only re-render the current panels, not the entire page
-				this.renderTagList(this.containerEl.querySelector('.settings-left-panel')!);
-				await this.renderNoteOrdering(this.containerEl.querySelector('.settings-right-panel')!);
+				
+				// Only re-render the left panel to update indicators
+				const leftPanel = this.containerEl.querySelector('.settings-left-panel');
+				if (leftPanel) {
+					this.isRendering = false; // Reset before re-render
+					this.renderTagList(leftPanel);
+				}
+				// Re-render right panel without the clear button
+				await this.renderNoteOrdering(container);
 			};
 		}
 	}
@@ -289,119 +325,142 @@ export class SettingsPageView extends ItemView {
 		if (!this.selectedTag) return [];
 		
 		const notes = [...this.currentNotes];
-		
-		// If custom order exists, use it
-		if (this.plugin.settings.customOrder[this.selectedTag]) {
-			const customOrder = this.plugin.settings.customOrder[this.selectedTag];
-			return notes.sort((a, b) => {
-				const aIndex = customOrder.indexOf(a.file.path);
-				const bIndex = customOrder.indexOf(b.file.path);
-				if (aIndex === -1 && bIndex === -1) return 0;
-				if (aIndex === -1) return 1;
-				if (bIndex === -1) return -1;
-				return aIndex - bIndex;
-			});
-		}
-
-		// Default sort by title
-		return notes.sort((a, b) => a.title.localeCompare(b.title));
+		return await this.plugin.sortNotes(notes, this.selectedTag);
 	}
 
 	async sortByModified() {
 		if (!this.selectedTag) return;
 		
 		const notes = [...this.currentNotes];
-		notes.sort((a, b) => b.file.stat.mtime - a.file.stat.mtime);
+		const sortedNotes = notes.sort((a, b) => b.file.stat.mtime - a.file.stat.mtime);
 		
-		// Save as custom order
-		this.plugin.settings.customOrder[this.selectedTag] = notes.map(note => note.file.path);
-		await this.plugin.saveSettings();
-		
+		await this.saveCustomOrder(sortedNotes);
 		new Notice('Sorted by modified time');
-		// Only re-render the affected panels
-		this.renderTagList(this.containerEl.querySelector('.settings-left-panel')!);
-		await this.renderNoteOrdering(this.containerEl.querySelector('.settings-right-panel')!);
 	}
 
 	async sortByName() {
 		if (!this.selectedTag) return;
 		
 		const notes = [...this.currentNotes];
-		notes.sort((a, b) => a.title.localeCompare(b.title));
+		const sortedNotes = notes.sort((a, b) => a.title.localeCompare(b.title));
 		
-		// Save as custom order
-		this.plugin.settings.customOrder[this.selectedTag] = notes.map(note => note.file.path);
-		await this.plugin.saveSettings();
-		
+		await this.saveCustomOrder(sortedNotes);
 		new Notice('Sorted by name');
-		// Only re-render the affected panels
-		this.renderTagList(this.containerEl.querySelector('.settings-left-panel')!);
-		await this.renderNoteOrdering(this.containerEl.querySelector('.settings-right-panel')!);
+	}
+
+	async saveCustomOrder(sortedNotes?: NoteData[]) {
+		if (!this.selectedTag) return;
+		
+		const notesToSave = sortedNotes || this.getCurrentOrderFromDOM();
+		const filePaths = notesToSave.map(note => note.file.path);
+		
+		await this.plugin.saveCustomOrder(this.selectedTag, filePaths);
+		
+		// Only re-render if we provided sorted notes (manual sort)
+		if (sortedNotes) {
+			// Only re-render the tag list to update indicators
+			const leftPanel = this.containerEl.querySelector('.settings-left-panel');
+			if (leftPanel) {
+				this.isRendering = false; // Reset before re-render
+				this.renderTagList(leftPanel);
+			}
+			
+			// Re-render right panel to show updated order
+			const rightPanel = this.containerEl.querySelector('.settings-right-panel');
+			if (rightPanel) {
+				await this.renderNoteOrdering(rightPanel);
+			}
+		}
+	}
+
+	getCurrentOrderFromDOM(): NoteData[] {
+		const noteElements = this.containerEl.querySelectorAll('.note-item');
+		const orderedNotes: NoteData[] = [];
+		
+		noteElements.forEach(el => {
+			const path = (el as HTMLElement).dataset.path;
+			const note = this.currentNotes.find(n => n.file.path === path);
+			if (note) {
+				orderedNotes.push(note);
+			}
+		});
+		
+		return orderedNotes;
 	}
 
 	async saveCurrentOrder() {
 		if (!this.selectedTag) return;
 		
-		const noteElements = this.containerEl.querySelectorAll('.note-item');
-		const customOrder = Array.from(noteElements).map(el => (el as HTMLElement).dataset.path!);
+		const orderedNotes = this.getCurrentOrderFromDOM();
+		const filePaths = orderedNotes.map(note => note.file.path);
 		
-		this.plugin.settings.customOrder[this.selectedTag] = customOrder;
+		this.plugin.settings.customOrder[this.selectedTag] = filePaths;
 		await this.plugin.saveSettings();
 		
 		new Notice('Custom order saved');
 		// Only re-render the left panel to show the custom order indicator
-		this.renderTagList(this.containerEl.querySelector('.settings-left-panel')!);
+		const leftPanel = this.containerEl.querySelector('.settings-left-panel');
+		if (leftPanel) {
+			this.isRendering = false; // Reset before re-render
+			this.renderTagList(leftPanel);
+		}
 	}
 
 	addDragHandlers(element: HTMLElement, container: HTMLElement) {
-		element.ondragstart = (e) => {
-			e.dataTransfer!.setData('text/plain', element.dataset.path!);
+		element.addEventListener('dragstart', (e) => {
+			this.draggedElement = element;
+			element.style.opacity = '0.5';
 			element.classList.add('dragging');
-		};
+		});
 
-		element.ondragend = () => {
+		element.addEventListener('dragend', (e) => {
+			element.style.opacity = '1';
 			element.classList.remove('dragging');
-		};
+			this.draggedElement = null;
+			
+			// Note: Don't auto-save here to avoid re-rendering issues
+			// User can manually save or we save when they leave the page
+		});
 
-		element.ondragover = (e) => {
+		element.addEventListener('dragover', (e) => {
 			e.preventDefault();
 			const rect = element.getBoundingClientRect();
-			const midpoint = rect.top + rect.height / 2;
+			const midY = rect.top + rect.height / 2;
 			
-			if (e.clientY < midpoint) {
+			// Visual feedback
+			element.classList.remove('drag-over-top', 'drag-over-bottom');
+			if (e.clientY < midY) {
 				element.classList.add('drag-over-top');
-				element.classList.remove('drag-over-bottom');
 			} else {
 				element.classList.add('drag-over-bottom');
-				element.classList.remove('drag-over-top');
 			}
-		};
+		});
 
-		element.ondragleave = () => {
+		element.addEventListener('dragleave', (e) => {
 			element.classList.remove('drag-over-top', 'drag-over-bottom');
-		};
+		});
 
-		element.ondrop = (e) => {
+		element.addEventListener('drop', (e) => {
 			e.preventDefault();
 			element.classList.remove('drag-over-top', 'drag-over-bottom');
 			
-			const draggedPath = e.dataTransfer!.getData('text/plain');
-			const draggedElement = container.querySelector(`[data-path="${draggedPath}"]`) as HTMLElement;
-			
-			if (draggedElement && draggedElement !== element) {
+			if (this.draggedElement && this.draggedElement !== element) {
 				const rect = element.getBoundingClientRect();
-				const midpoint = rect.top + rect.height / 2;
+				const midY = rect.top + rect.height / 2;
 				
-				if (e.clientY < midpoint) {
-					container.insertBefore(draggedElement, element);
+				if (e.clientY < midY) {
+					container.insertBefore(this.draggedElement, element);
 				} else {
-					container.insertBefore(draggedElement, element.nextSibling);
+					container.insertBefore(this.draggedElement, element.nextSibling);
 				}
+				
+				// Show indication that order changed but don't auto-save
+				new Notice('Drag completed - remember to save your changes');
 			}
-		};
+		});
 	}
 
 	async onClose() {
-		// Clean up
+		// Clean up if needed
 	}
 } 

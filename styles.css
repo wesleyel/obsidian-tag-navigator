@@ -338,135 +338,191 @@ If your plugin does not need CSS, delete this file.
 	padding: 20px;
 }
 
-/* Settings Page Styles - Two Column Layout */
+/* Tag Navigator Settings Page */
 .tag-navigator-settings-page {
 	padding: 20px;
-	max-width: 100%;
-	height: 100%;
-	overflow: auto;
+	max-width: 1200px;
+	margin: 0 auto;
 }
 
 .settings-page-header {
-	margin-bottom: 12px;
-	border-bottom: 2px solid var(--background-modifier-border);
-	padding-bottom: 8px;
+	margin-bottom: 30px;
+	border-bottom: 1px solid var(--background-modifier-border);
+	padding-bottom: 20px;
+}
+
+.settings-page-header h2 {
+	margin: 0;
+	color: var(--text-normal);
 }
 
 .main-settings {
 	margin-bottom: 30px;
-	padding: 15px;
 	background: var(--background-secondary);
+	padding: 20px;
 	border-radius: 8px;
+}
+
+.export-section {
+	margin-bottom: 30px;
+	background: var(--background-secondary);
+	padding: 20px;
+	border-radius: 8px;
+}
+
+.export-section h3 {
+	margin-top: 0;
+	margin-bottom: 10px;
+	color: var(--text-normal);
+}
+
+.export-buttons {
+	display: flex;
+	gap: 10px;
+	margin-top: 15px;
 }
 
 .settings-layout {
 	display: flex;
 	gap: 20px;
-	height: calc(100vh - 200px);
-	min-height: 400px;
+	height: 600px;
 }
 
 .settings-left-panel {
-	flex: 0 0 300px;
-	border: 1px solid var(--background-modifier-border);
+	flex: 1;
+	background: var(--background-secondary);
 	border-radius: 8px;
-	padding: 15px;
-	background: var(--background-primary);
+	padding: 20px;
 	overflow-y: auto;
-	position: relative;
 }
 
 .settings-right-panel {
-	flex: 1;
-	border: 1px solid var(--background-modifier-border);
+	flex: 2;
+	background: var(--background-secondary);
 	border-radius: 8px;
-	padding: 15px;
-	background: var(--background-primary);
+	padding: 20px;
 	overflow-y: auto;
-	position: relative;
 }
 
 .panel-header {
-	margin-bottom: 10px;
+	margin-bottom: 15px;
 	border-bottom: 1px solid var(--background-modifier-border);
-	padding-bottom: 6px;
+	padding-bottom: 10px;
+}
+
+.panel-header h3 {
+	margin: 0;
+	color: var(--text-normal);
+}
+
+/* Tag sort controls */
+.tag-sort-controls {
+	display: flex;
+	gap: 5px;
+	margin-bottom: 15px;
+	border: 1px solid var(--background-modifier-border);
+	border-radius: 6px;
+	overflow: hidden;
+}
+
+.tag-sort-controls button {
+	flex: 1;
+	padding: 8px 12px;
+	border: none;
+	background: var(--background-primary);
+	color: var(--text-muted);
+	cursor: pointer;
+	transition: all 0.2s ease;
+	font-size: 12px;
+	font-weight: 500;
+}
+
+.tag-sort-controls button:hover {
+	background: var(--background-modifier-hover);
+	color: var(--text-normal);
+}
+
+.tag-sort-controls button.mod-cta {
+	background: var(--interactive-accent);
+	color: var(--text-on-accent);
+}
+
+.tag-sort-controls button.mod-cta:hover {
+	background: var(--interactive-accent-hover);
 }
 
 .tag-list {
 	display: flex;
 	flex-direction: column;
-	gap: 8px;
+	gap: 5px;
 }
 
 .tag-item {
 	display: flex;
 	align-items: center;
-	justify-content: space-between;
-	padding: 8px 12px;
+	padding: 10px 12px;
+	background: var(--background-primary);
 	border: 1px solid var(--background-modifier-border);
 	border-radius: 6px;
 	cursor: pointer;
-	transition: background-color 0.2s;
-	position: relative;
-	z-index: 1;
+	transition: all 0.2s ease;
+	gap: 8px;
 }
 
 .tag-item:hover {
 	background: var(--background-modifier-hover);
+	border-color: var(--background-modifier-border-hover);
 }
 
 .tag-item.selected {
-	background: var(--background-modifier-success);
-	border-color: var(--color-accent);
+	background: var(--interactive-accent);
+	color: var(--text-on-accent);
+	border-color: var(--interactive-accent);
 }
 
-.custom-order-indicator {
-	margin-left: 8px;
-	opacity: 0.7;
-	pointer-events: none;
-}
-
-.tag-count {
-	font-size: 12px;
-	color: var(--text-muted);
+.tag-item .custom-order-indicator {
 	margin-left: auto;
-	pointer-events: none;
+	font-size: 14px;
 }
 
-.empty-state {
-	text-align: center;
+.tag-item .tag-count {
 	color: var(--text-muted);
-	padding: 40px 20px;
-	font-style: italic;
+	font-size: 12px;
+	margin-left: auto;
+}
+
+.tag-item.selected .tag-count {
+	color: var(--text-on-accent);
+	opacity: 0.8;
 }
 
 .ordering-actions {
 	display: flex;
 	gap: 10px;
-	margin-bottom: 15px;
+	margin-bottom: 20px;
 	flex-wrap: wrap;
 }
 
 .sortable-notes-list {
-	display: flex;
-	flex-direction: column;
-	gap: 8px;
+	border: 1px solid var(--background-modifier-border);
+	border-radius: 6px;
+	overflow: hidden;
 	margin-bottom: 20px;
-	max-height: 400px;
-	overflow-y: auto;
 }
 
 .note-item {
 	display: flex;
 	align-items: center;
-	gap: 10px;
-	padding: 10px;
-	border: 1px solid var(--background-modifier-border);
-	border-radius: 6px;
+	padding: 12px;
 	background: var(--background-primary);
-	transition: all 0.2s;
-	cursor: grab;
-	position: relative;
+	border-bottom: 1px solid var(--background-modifier-border);
+	cursor: move;
+	transition: all 0.2s ease;
+	gap: 10px;
+}
+
+.note-item:last-child {
+	border-bottom: none;
 }
 
 .note-item:hover {
@@ -475,82 +531,59 @@ If your plugin does not need CSS, delete this file.
 
 .note-item.dragging {
 	opacity: 0.5;
-	transform: rotate(2deg);
-	cursor: grabbing;
 }
 
-.note-item.drag-over-top {
-	border-top: 3px solid var(--color-accent);
-}
-
-.note-item.drag-over-bottom {
-	border-bottom: 3px solid var(--color-accent);
-}
-
-.drag-handle {
-	cursor: grab;
+.note-item .drag-handle {
 	color: var(--text-muted);
-	font-size: 14px;
+	cursor: grab;
 	user-select: none;
-	min-width: 20px;
+	font-size: 14px;
 }
 
-.drag-handle:active {
+.note-item .drag-handle:active {
 	cursor: grabbing;
 }
 
-.note-title {
+.note-item .note-title {
 	flex: 1;
+	font-weight: 500;
+	color: var(--text-normal);
 	cursor: pointer;
-	color: var(--text-accent);
 }
 
-.note-title:hover {
-	text-decoration: underline;
+.note-item .note-title:hover {
+	color: var(--interactive-accent);
 }
 
-.note-info {
+.note-item .note-info {
 	display: flex;
 	flex-direction: column;
+	align-items: flex-end;
 	gap: 2px;
-	pointer-events: none;
 }
 
-.note-date {
+.note-item .note-date {
 	font-size: 11px;
 	color: var(--text-muted);
 }
 
-.save-order-btn {
-	margin-right: 10px;
+.empty-state {
+	text-align: center;
+	color: var(--text-muted);
+	font-style: italic;
+	padding: 40px 20px;
 }
 
-/* Manual Navigation Modal Styles */
-.modal .notes-list {
-	margin-top: 20px;
+/* Drag and drop visual feedback */
+.note-item.drag-over-top {
+	border-top: 2px solid var(--interactive-accent);
 }
 
-.modal .sort-options {
-	margin-bottom: 15px;
+.note-item.drag-over-bottom {
+	border-bottom: 2px solid var(--interactive-accent);
 }
 
-.modal .sort-options select {
-	width: 100%;
-	padding: 8px;
-	border: 1px solid var(--background-modifier-border);
-	border-radius: 4px;
-	background: var(--background-primary);
-}
-
-.modal .sortable-notes-list .note-item {
-	cursor: pointer;
-}
-
-.modal .sortable-notes-list .note-item span {
-	pointer-events: none;
-}
-
-/* 响应式设计 */
+/* Responsive design */
 @media (max-width: 768px) {
 	.settings-layout {
 		flex-direction: column;
@@ -560,76 +593,10 @@ If your plugin does not need CSS, delete this file.
 	.settings-left-panel,
 	.settings-right-panel {
 		flex: none;
-		min-height: 200px;
+		height: 400px;
 	}
 	
 	.ordering-actions {
 		flex-direction: column;
-	}
-	
-	.ordering-actions button {
-		width: 100%;
-	}
-}
-
-/* Settings Page Export Section */
-.export-section {
-	margin-top: 20px;
-	padding-top: 20px;
-	border-top: 1px solid var(--background-modifier-border);
-}
-
-.export-section h3 {
-	margin-bottom: 6px;
-	color: var(--text-accent);
-}
-
-.export-buttons {
-	display: flex;
-	gap: 10px;
-	margin-top: 15px;
-	flex-wrap: wrap;
-}
-
-.export-buttons button {
-	padding: 8px 16px;
-	border: 1px solid var(--background-modifier-border);
-	border-radius: 6px;
-	background: var(--interactive-accent);
-	color: var(--text-on-accent);
-	cursor: pointer;
-	font-weight: 500;
-	transition: all 0.2s;
-}
-
-.export-buttons button:hover:not(:disabled) {
-	background: var(--interactive-accent-hover);
-	transform: translateY(-1px);
-}
-
-.export-buttons button:disabled {
-	opacity: 0.6;
-	cursor: not-allowed;
-	transform: none;
-}
-
-.ordering-actions button.mod-warning {
-	background: var(--color-orange);
-	border-color: var(--color-orange);
-	color: var(--text-on-accent);
-}
-
-.ordering-actions button.mod-warning:hover:not(:disabled) {
-	background: color-mix(in srgb, var(--color-orange) 85%, black);
-}
-
-/* Responsive design for export buttons */
-@media (max-width: 768px) {
-	.export-buttons {
-		flex-direction: column;
-	}
-	
-	.export-buttons button {
-		width: 100%;
 	}
 }
