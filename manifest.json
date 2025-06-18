@@ -1,9 +1,9 @@
 {
 	"id": "tag-navigator",
 	"name": "Tag Navigator",
-	"version": "1.0.0",
+	"version": "1.0.1",
 	"minAppVersion": "0.15.0",
-	"description": "Intelligent navigation for notes based on tags and frontmatter properties.",
+	"description": "An intelligent navigation plugin that provides smart next/previous navigation based on tags and frontmatter properties.",
 	"author": "wesley",
 	"authorUrl": "",
 	"fundingUrl": "",

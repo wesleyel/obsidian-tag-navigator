@@ -1,7 +1,7 @@
 {
 	"name": "obsidian-tag-navigator",
-	"version": "1.0.0",
-	"description": "Intelligent navigation for notes based on tags and frontmatter properties.",
+	"version": "1.0.1",
+	"description": "An intelligent navigation plugin that provides smart next/previous navigation based on tags and frontmatter properties.",
 	"main": "main.js",
 	"repository": {
 		"type": "git",
