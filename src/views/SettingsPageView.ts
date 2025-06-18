@@ -90,6 +90,17 @@ export class SettingsPageView extends ItemView {
 					await this.plugin.saveSettings();
 				}));
 
+		new Setting(settingsContainer)
+			.setName('Export File Name Format')
+			.setDesc('Format for exported file names. Use {tag} as placeholder for the tag name.')
+			.addText(text => text
+				.setPlaceholder('tag-{tag}.md')
+				.setValue(this.plugin.settings.exportFileNameFormat)
+				.onChange(async (value) => {
+					this.plugin.settings.exportFileNameFormat = value || 'tag-{tag}.md';
+					await this.plugin.saveSettings();
+				}));
+
 		// Export section
 		const exportSection = settingsContainer.createEl('div', { cls: 'export-section' });
 		exportSection.createEl('h3', { text: 'Export Functions' });

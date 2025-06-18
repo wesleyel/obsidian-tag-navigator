@@ -157,6 +157,7 @@ export default class TagNavigatorPlugin extends Plugin {
 					tag,
 					notes,
 					this.settings.exportFolderPath,
+					this.settings.exportFileNameFormat,
 					this.settings.sortOrder,
 					this.settings.customOrder
 				);
@@ -185,6 +186,7 @@ export default class TagNavigatorPlugin extends Plugin {
 			tag,
 			notes,
 			this.settings.exportFolderPath,
+			this.settings.exportFileNameFormat,
 			this.settings.sortOrder,
 			this.settings.customOrder
 		);

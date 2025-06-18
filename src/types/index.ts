@@ -5,6 +5,7 @@ export interface TagNavigatorSettings {
 	showToastMessages: boolean;
 	customOrder: Record<string, string[]>; // tag -> ordered file paths
 	exportFolderPath: string; // 导出文件夹路径
+	exportFileNameFormat: string; // 导出文件名称格式，支持 {tag} 占位符
 }
 
 export interface NoteData {
@@ -24,7 +25,8 @@ export const DEFAULT_SETTINGS: TagNavigatorSettings = {
 	sortOrder: 'title',
 	showToastMessages: true,
 	customOrder: {},
-	exportFolderPath: 'tag-exports' // 默认导出文件夹
+	exportFolderPath: 'tag-exports', // 默认导出文件夹
+	exportFileNameFormat: 'tag-{tag}.md' // 默认导出文件名称格式
 };
 
 export const VIEW_TYPE_NAVIGATOR_PANEL = "navigator-panel";
